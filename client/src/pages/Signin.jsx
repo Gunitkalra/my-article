@@ -1,21 +1,41 @@
 import React, { useState } from 'react'
-import {Button,Label,TextInput}from 'flowbite-react'
-import {Link} from 'react-router-dom'
+import {Alert, Button,Label,Spinner,TextInput}from 'flowbite-react'
+import {Link, Navigate, useNavigate} from 'react-router-dom'
 function SignIn() {
+  const Navigate= useNavigate()
+  const[loading,setLoading]=useState(false)
+  const[errorMessage,seterrorMessage]=useState(null)
   const [formData,setFormData]=useState({})
   const handleChange=(e)=>{
-setFormData({...formData,[e.target.id]:e.target.value})
+setFormData({...formData,[e.target.id]:e.target.value.trim()})
   }
   console.log(formData)
    const handleSubmit=async(e)=>{
     e.preventDefault()
-    
-    const res=await fetch('/api/auth/signup',{
+    if(!formData.username||!formData.email||!formData.password){
+      return seterrorMessage("all feilds are required")
+    }
+   try {
+    seterrorMessage(null)
+    setLoading(true)
+     const res=await fetch('/api/auth/signup',{
       method:'post',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify(formData)
     })
     console.log(res)
+    const data=await res. json()
+    if(data.sucess=== false){
+      return seterrorMessage(data.message)
+    }
+    setLoading(false)
+    if (res.ok){
+      Navigate('/login')
+    }
+   } catch (error) {
+    seterrorMessage(error.message)
+    setLoading(false)
+   }
    }
   return (
   
@@ -37,18 +57,33 @@ setFormData({...formData,[e.target.id]:e.target.value})
           </div>
           <div>
               <Label value='Your Email'/>
-              <TextInput type='text' placeholder='Email'id='email' onChange={handleChange}/>
+              <TextInput type='email' placeholder='Email'id='email' onChange={handleChange}/>
           </div>
           <div>
               <Label value='Your password'/>
               <TextInput type='password' placeholder='password' id='password' onChange={handleChange}/>
           </div>
-          <Button gradientDuoTone='purpleToPink' type='submit'>signin</Button>
+          <Button gradientDuoTone='purpleToPink' type='submit' disabled={loading}>
+            {loading?(
+            <>
+            <Spinner size='sm'/>
+            <span className='pl-3'>loading</span>
+            </>
+            ):(
+               "sign up"
+            )}
+           
+          </Button>
         </form>
         <div className='flex gap-2 text-sm mt-5'>
           <span> Have an account?</span>
           <Link to='/login' className='text-blue-500'>login</Link>
         </div>
+        {errorMessage&&(
+          <Alert className='mt-5'color='failure'>
+            {errorMessage}
+          </Alert>
+        )}
       </div>
 
 
