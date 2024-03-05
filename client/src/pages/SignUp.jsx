@@ -1,10 +1,14 @@
 import React, { useState } from 'react'
 import {Alert, Button,Label,Spinner,TextInput}from 'flowbite-react'
-import {Link, Navigate, useNavigate} from 'react-router-dom'
+import { useDispatch,useSelector } from 'react-redux'
+import { signInFailure,signInSuccess,signInStart } from '../redux/User/userSlice'
+import {Link, useNavigate} from 'react-router-dom'
+import OAuth from '../components/OAuth'
+
 function SignUp() {
   const Navigate= useNavigate()
-  const[loading,setLoading]=useState(false)
-  const[errorMessage,seterrorMessage]=useState(null)
+  const dispatch=useDispatch()
+  const {loading,error:errorMessage}=useSelector((state)=>state.user)
   const [formData,setFormData]=useState({})
   const handleChange=(e)=>{
 setFormData({...formData,[e.target.id]:e.target.value.trim()})
@@ -13,28 +17,27 @@ setFormData({...formData,[e.target.id]:e.target.value.trim()})
    const handleSubmit=async(e)=>{
     e.preventDefault()
     if(!formData.email||!formData.password){
-      return seterrorMessage("all feilds are required")
+      return dispatch(signInFailure("all feilds are required"))
     }
    try {
-    seterrorMessage(null)
-    setLoading(true)
+    dispatch(signInStart())
      const res=await fetch('/api/auth/signin',{
       method:'post',
       headers:{'Content-Type':'application/json'},
       body: JSON.stringify(formData)
     })
-    console.log(res)
+    // console.log(res)
     const data=await res. json()
     if(data.sucess=== false){
-      return seterrorMessage(data.message)
+      return dispatch(signInFailure(data.message))
     }
-    setLoading(false)
+  
     if (res.ok){
+      dispatch(signInSuccess(data))
       Navigate('/')
     }
    } catch (error) {
-    seterrorMessage(error.message)
-    setLoading(false)
+  dispatch(signInFailure(error.message))
    }
    }
   return (
@@ -60,7 +63,7 @@ setFormData({...formData,[e.target.id]:e.target.value.trim()})
               <Label value='Your password'/>
               <TextInput type='password' placeholder='password' id='password' onChange={handleChange}/>
           </div>
-          <Button gradientDuoTone='purpleToPink' type='submit' disabled={loading}>
+          <Button gradientDuoTone='purpleToPink' type='submit' disabled={loading} className='mt-3'>
             {loading?(
             <>
             <Spinner size='sm'/>
@@ -71,10 +74,11 @@ setFormData({...formData,[e.target.id]:e.target.value.trim()})
             )}
            
           </Button>
+          <OAuth />
         </form>
         <div className='flex gap-2 text-sm mt-5'>
           <span>Don't Have an account?</span>
-          <Link to='/register' className='text-blue-500'>login</Link>
+          <Link to='/register' className='text-blue-500'>Register</Link>
         </div>
         {errorMessage&&(
           <Alert className='mt-5'color='failure'>

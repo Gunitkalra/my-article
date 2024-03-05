@@ -1,6 +1,7 @@
 import React, { useState } from 'react'
 import {Alert, Button,Label,Spinner,TextInput}from 'flowbite-react'
 import {Link, Navigate, useNavigate} from 'react-router-dom'
+import OAuth from '../components/OAuth'
 function SignIn() {
   const Navigate= useNavigate()
   const[loading,setLoading]=useState(false)
@@ -63,7 +64,7 @@ setFormData({...formData,[e.target.id]:e.target.value.trim()})
               <Label value='Your password'/>
               <TextInput type='password' placeholder='password' id='password' onChange={handleChange}/>
           </div>
-          <Button gradientDuoTone='purpleToPink' type='submit' disabled={loading}>
+          <Button gradientDuoTone='purpleToPink' type='submit' disabled={loading} className='mt-3'>
             {loading?(
             <>
             <Spinner size='sm'/>
@@ -74,6 +75,7 @@ setFormData({...formData,[e.target.id]:e.target.value.trim()})
             )}
            
           </Button>
+          <OAuth/>
         </form>
         <div className='flex gap-2 text-sm mt-5'>
           <span> Have an account?</span>
