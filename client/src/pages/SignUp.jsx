@@ -28,7 +28,7 @@ setFormData({...formData,[e.target.id]:e.target.value.trim()})
     })
     // console.log(res)
     const data=await res. json()
-    if(data.sucess=== false){
+    if(data.success=== false){
       return dispatch(signInFailure(data.message))
     }
   
